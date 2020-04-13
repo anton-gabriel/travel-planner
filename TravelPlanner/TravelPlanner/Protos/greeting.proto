@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option csharp_namespace = "Generated";
+
+message GreetingRequest {
+	string message = 1;
+	string sender_name = 2;
+}
+
+message GreetingResponse {
+	string message = 1;
+}
+
+service GreetingService {
+	rpc Greet(GreetingRequest) returns (GreetingResponse);
+}
