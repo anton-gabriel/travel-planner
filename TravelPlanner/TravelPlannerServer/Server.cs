@@ -39,7 +39,7 @@ namespace TravelPlannerServer
         {
             get
             {
-                yield return Generated.GreetingService.BindService(new Services.GreetingService());
+                yield return Generated.AuthenticationService.BindService(new Services.AuthenticationService());
             }
         }
 
