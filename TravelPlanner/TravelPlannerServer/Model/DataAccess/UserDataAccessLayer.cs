@@ -9,6 +9,11 @@ namespace TravelPlannerServer.Model.DataAccess
         #region Public methods
         public static bool Login(User user)
         {
+            if (user is null)
+            {
+                throw new System.ArgumentNullException(nameof(user));
+            }
+
             using var unitOfWork = new UnitOfWork(new TravelPlannerContext());
             return unitOfWork
                 .Users
@@ -16,6 +21,11 @@ namespace TravelPlannerServer.Model.DataAccess
         }
         public static bool Register(User user)
         {
+            if (user is null)
+            {
+                throw new System.ArgumentNullException(nameof(user));
+            }
+
             using var unitOfWork = new UnitOfWork(new TravelPlannerContext());
             bool registered = unitOfWork
                 .Users

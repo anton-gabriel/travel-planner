@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TravelPlannerServer.Model.Entity
 {
@@ -15,16 +14,16 @@ namespace TravelPlannerServer.Model.Entity
         #endregion
 
         #region Properties
-        [Index(IsUnique = true)]
+        [Key]
         [Required]
-        [StringLength(200)]
         public int Id { get; private set; }
-        [Index(IsUnique = true)]
         [Required]
-        [StringLength(200)]
+        [MinLength(1)]
+        [MaxLength(200)]
         public string Username { get; private set; }
         [Required]
-        [StringLength(200)]
+        [MinLength(1)]
+        [MaxLength(200)]
         public string Password { get; private set; }
         #endregion
     }

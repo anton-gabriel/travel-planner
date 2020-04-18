@@ -26,10 +26,13 @@ namespace TravelPlannerServer
         /// Creates a new server.
         /// </summary>
         /// <param name="serverData">Contains host and port data in one object.</param>
-        public Server(ServerData serverData) 
+        public Server(ServerData serverData)
             : this(host: serverData.Host, port: serverData.Port)
         {
-
+            if (serverData is null)
+            {
+                throw new ArgumentNullException(nameof(serverData));
+            }
         }
         #endregion
 

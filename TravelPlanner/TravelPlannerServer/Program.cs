@@ -5,13 +5,14 @@ namespace TravelPlannerServer
 {
     internal sealed class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             using Server server = new Server(Configuration.Instance.Settings.ServerData)
             {
                 CloseServerAction = () => Console.ReadKey()
             };
             server.Start();
+            Console.WriteLine("Press any key to exit...");
         }
     }
 }
