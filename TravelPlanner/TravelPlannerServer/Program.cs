@@ -1,4 +1,5 @@
 ﻿using System;
+using TravelPlannerServer.Logger;
 using TravelPlannerServer.Utils;
 
 namespace TravelPlannerServer
@@ -7,6 +8,9 @@ namespace TravelPlannerServer
     {
         static void Main()
         {
+            var logger = LoggerConfiguration.GetLogger();
+            logger.Info("Application started.");
+
             using Server server = new Server(Configuration.Instance.Settings.ServerData)
             {
                 CloseServerAction = () => Console.ReadKey()

@@ -1,0 +1,57 @@
+Creaționale:
+	- Singleton -> Logger
+	- Builder -> TravelRequestBuilder
+	   Ctor: StartDate
+	   Functii: AddEndDate
+	            AddNumberOfDays
+				AddNumberOfPersons
+				AddNumberOfRooms
+				.Build() => TravelRequest
+	
+Structurale (minim 2):
+	- Proxy -> 
+		Daca user-ul sete logat, merg anumite comenzi.
+	- Bridge ->
+	    ILogger
+		Doua tipuri de logger (consola si fisier)
+	- Facade ->
+		LoggerFacade -> "Interfata peste ILogger -> din fuctia Log se creeaza o interfata mai usor de apelat"
+		
+	
+Comportamentale (minim 3):
+
+	- Chain of responsability ->
+	    În funcție de numărul de zile se duce la un TripSolver mai mare
+		 DailyTripSolver -> va cauta oferte doar din Romania
+		 NormalTripSolver -> va cauta oferte și din afară
+		 LuxuryTripSolver -> oferte cu croaziere
+		 ***in baza de date se va afla o listă de oferte predefinite
+		    clasa Offer (Days, Location, Price, NumberOfPersons)
+
+	- State	-> Reprezintă starea Trip-ului, în funcție de ea anumite funcții vor fi posibile
+	  
+	- Command:
+		Interfata ICommand cu functie Execute
+		Fiecare comanda din meniu va fi derivata din ICommand
+		ReceiverInvoker care primeste ca paramentru c-tor un ICommand, si il executa (+ logare)
+
+	Meniu:
+	 1. Make travel request->
+	    se deschide meniul cu construirea lui, prin TravelRequestBuilder
+	 2. Find offers -> Comanda care se va folosi in primul rand de TripSolver pentru a lista locatiile disponibile (meniu separat, cu optiunea select offer)
+	 
+		*** clasa Trip contine un Offer, StartDate, EndDate(default StartDate + Offer.Days), NumberOfPersons(default 1)
+		(Si clasa Trip va fi salvata in baza de date)
+	 3. Show my trips
+	     -> listare trips si afisare 2 optiuni: 1.Edit trip, 2.Back
+			Pentru opțiunea 1.Edit se va introduce nr-ul tripului, iar
+			pentru el se va lista un meniu cu opțiunile
+			1. Change number of persons
+			2. Change start date -> va merge doar daca prin modificarea ei, numărul de zile e mai mare decât cele din ofertă
+			3. Change end date -> va merge doar daca prin modificarea ei, numărul de zile e mai mare decât cele din ofertă, sau in desfașurare
+			4. Cancel(Delete) -> va merge daca data currentă este mai mică decât StartDate din Trip (înseamnă ca înca nu a început trip-ul) 
+			***Pentru aceste opțiuni se va folosi State-ul
+			
+			Stari: EndedStateTrip, DueStateTrip, OngoingStateTrip
+Extra:
+ Repository (kind: https://stackoverflow.com/questions/23213543/what-type-is-repository-pattern-in)
