@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TravelPlannerServer.Logger;
 
 namespace TravelPlannerServer
 {
@@ -45,6 +46,7 @@ namespace TravelPlannerServer
                 yield return Generated.AuthenticationService.BindService(new Services.AuthenticationService());
             }
         }
+        private ILoggerFacade Logger { get; set; } = TravelPlannerLogger.Instance;
 
         /// <summary>
         /// The action after that the server will shut down.
@@ -60,12 +62,8 @@ namespace TravelPlannerServer
         {
             GrpcServer.Start();
             var port = GrpcServer.Ports.FirstOrDefault();
-            //Logger.Info(LoggerMessages.ServerStartedMessage(port.Host, port.Port));
+            Logger.Info(message: $"Server started (host: {port.Host}, port: {port.Port}). Press any key to exit.");
         }
-        #endregion
-
-        #region Logger
-        //private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Private methods
@@ -81,7 +79,7 @@ namespace TravelPlannerServer
             CloseServerAction.Invoke();
             GrpcServer.ShutdownAsync().Wait();
             var port = GrpcServer.Ports.FirstOrDefault();
-            //Logger.Info(message: LoggerMessages.ServerClosedMessage(port.Host, port.Port));
+            Logger.Info(message: $"Server closed (host: {port.Host}, port: {port.Port}).");
         }
         #endregion
     }

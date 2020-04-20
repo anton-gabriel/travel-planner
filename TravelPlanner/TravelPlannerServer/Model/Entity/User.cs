@@ -26,5 +26,12 @@ namespace TravelPlannerServer.Model.Entity
         [MaxLength(200)]
         public string Password { get; private set; }
         #endregion
+
+        #region Overrides
+        public override string ToString()
+        {
+            return $"{Username}";
+        }
+        #endregion
     }
 }
