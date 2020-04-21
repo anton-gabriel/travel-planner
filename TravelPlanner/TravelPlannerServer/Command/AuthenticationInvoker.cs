@@ -1,22 +1,31 @@
-﻿namespace TravelPlannerServer.Command
+﻿using System.Collections.Generic;
+using TravelPlannerServer.AuthenticationObservable;
+
+namespace TravelPlannerServer.Command
 {
     internal sealed class AuthenticationInvoker
     {
         #region Constructors
-        public AuthenticationInvoker(ICommand command)
+        public AuthenticationInvoker()
         {
-            Command = command ?? throw new System.ArgumentNullException(nameof(command));
+            Listeners = new List<IAuthenticationObservable>();
         }
         #endregion
 
-        #region Properties
-        private ICommand Command { get; set; }
+        #region Listeners
+        public List<IAuthenticationObservable> Listeners { get; private set; }
         #endregion
 
         #region Public methods
-        public bool Authenticate()
+        public bool Authenticate(ICommand command)
         {
-            return Command.Execute();
+            if (command is null)
+            {
+                throw new System.ArgumentNullException(nameof(command));
+            }
+            bool result = command.Execute();
+            Listeners.ForEach(listener => listener.Update(result));
+            return result;
         }
         #endregion
     }

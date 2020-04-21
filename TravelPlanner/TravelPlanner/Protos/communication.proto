@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "Generated";
+
+message UserRequest {
+	string input = 1;
+}
+
+message Response {
+	string message = 2;
+}
+
+service CommunicationService {
+	rpc Communicate(stream UserRequest) returns (stream Response);
+}

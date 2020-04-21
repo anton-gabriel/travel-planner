@@ -11,13 +11,13 @@ namespace TravelPlannerClient
         public ServerConnection(string host, int port)
         {
             Channel = new Channel($"{host}:{port}", ChannelCredentials.Insecure);
-            Client = new AuthenticationService.AuthenticationServiceClient(Channel);
+            Client = new CommunicationService.CommunicationServiceClient(Channel);
         }
         #endregion
 
         #region Properties
         public Channel Channel { get; private set; }
-        public AuthenticationService.AuthenticationServiceClient Client;
+        public CommunicationService.CommunicationServiceClient Client;
 
         #endregion
 

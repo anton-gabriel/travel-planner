@@ -1,18 +1,42 @@
 ﻿using Generated;
+using Grpc.Core;
 using System;
+using System.Threading.Tasks;
 using TravelPlannerClient.Utils;
 
 namespace TravelPlannerClient
 {
     internal sealed class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             ServerConnection connection = new ServerConnection(Constants.Host, Constants.Port);
-            while (true)
+            const string stopMessage = "stop";
+            using var call = connection.Client.Communicate();
+            var responseReaderTask = Task.Run(async () =>
             {
-                ShowMenu(connection);
+                while (await call.ResponseStream.MoveNext())
+                {
+                    var response = call.ResponseStream.Current;
+                    Console.WriteLine("Received: " + response);
+                }
+            });
+
+            string input = Console.ReadLine();
+            while (input != stopMessage)
+            {
+                try
+                {
+                    await call.RequestStream.WriteAsync(new UserRequest() { Input = input });
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception.Message);
+                }
+                input = Console.ReadLine();
             }
+            await call.RequestStream.CompleteAsync();
+            await responseReaderTask;
         }
 
         private static void ShowMenu(ServerConnection connection)
@@ -56,24 +80,6 @@ namespace TravelPlannerClient
             string username = Console.ReadLine();
             Console.WriteLine($"Password: ");
             string password = Console.ReadLine();
-            var request = new LoginRequest()
-            {
-                Username = username,
-                Password = password
-            };
-
-            using (var response = connection.Client.LoginAsync(request))
-            {
-                if (response.ResponseAsync.Result.Success)
-                {
-                    Console.WriteLine("Login successful.");
-                    //Show travel menu
-                }
-                else
-                {
-                    Console.WriteLine("Login failed.");
-                }
-            }
         }
 
         private static void Register(ServerConnection connection)
@@ -82,24 +88,6 @@ namespace TravelPlannerClient
             string username = Console.ReadLine();
             Console.WriteLine($"Password: ");
             string password = Console.ReadLine();
-            var request = new RegisterRequest()
-            {
-                Username = username,
-                Password = password
-            };
-
-            using (var response = connection.Client.RegisterAsync(request))
-            {
-                if (response.ResponseAsync.Result.Success)
-                {
-                    Console.WriteLine("Registration successful.");
-                    //Show travel menu
-                }
-                else
-                {
-                    Console.WriteLine("Registration failed.");
-                }
-            }
         }
     }
 }

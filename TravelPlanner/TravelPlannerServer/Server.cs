@@ -43,7 +43,7 @@ namespace TravelPlannerServer
         {
             get
             {
-                yield return Generated.AuthenticationService.BindService(new Services.AuthenticationService());
+                yield return Generated.CommunicationService.BindService(new Services.CommunicationService());
             }
         }
         private ILoggerFacade Logger { get; set; } = TravelPlannerLogger.Instance;
@@ -62,7 +62,7 @@ namespace TravelPlannerServer
         {
             GrpcServer.Start();
             var port = GrpcServer.Ports.FirstOrDefault();
-            Logger.Info(message: $"Server started (host: {port.Host}, port: {port.Port}). Press any key to exit.");
+            Logger.Info(message: $"Server started (host: {port.Host}, port: {port.Port}). Press any key to close the server.");
         }
         #endregion
 
