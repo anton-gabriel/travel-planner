@@ -14,6 +14,8 @@ namespace TravelPlannerServer.Database
 
         #region Properties
         public DbSet<User> Users { get; set; }
+        public DbSet<Offer> Offers { get; set; }
+        public DbSet<Trip> Trips { get; set; }
         #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

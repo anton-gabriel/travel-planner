@@ -1,4 +1,5 @@
 ﻿using System;
+using TravelPlannerServer.Utils.Enums;
 
 namespace TravelPlannerServer.Model
 {
@@ -14,8 +15,7 @@ namespace TravelPlannerServer.Model
         #region Properties
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
-        public string Location { get; private set; }
-        public uint NumberOfDays { get; private set; }
+        public TravelLocationType LocationType { get; private set; }
         public uint NumberOfPersons { get; private set; }
         public uint NumberOfRooms { get; private set; }
         #endregion
@@ -40,11 +40,6 @@ namespace TravelPlannerServer.Model
                 TravelRequest.EndDate = date;
                 return this;
             }
-            public TravelRequestBuilder AddNumberOfDays(uint days)
-            {
-                TravelRequest.NumberOfDays = days;
-                return this;
-            }
             public TravelRequestBuilder AddNumberOfPersons(uint persons)
             {
                 TravelRequest.NumberOfPersons = persons;
@@ -55,9 +50,9 @@ namespace TravelPlannerServer.Model
                 TravelRequest.NumberOfRooms = rooms;
                 return this;
             }
-            public TravelRequestBuilder AddLocation(string location)
+            public TravelRequestBuilder AddLocation(TravelLocationType locationType)
             {
-                TravelRequest.Location = location;
+                TravelRequest.LocationType = locationType;
                 return this;
             }
             public TravelRequest Build()

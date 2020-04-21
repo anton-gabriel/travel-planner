@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelPlannerServer.Database;
 
 namespace TravelPlannerServer.Migrations
 {
     [DbContext(typeof(TravelPlannerContext))]
-    partial class TravelPlannerContextModelSnapshot : ModelSnapshot
+    [Migration("20200421104118_UpdateOffer")]
+    partial class UpdateOffer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,14 +69,9 @@ namespace TravelPlannerServer.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OfferId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Trips");
                 });
@@ -108,10 +105,6 @@ namespace TravelPlannerServer.Migrations
                         .HasForeignKey("OfferId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TravelPlannerServer.Model.Entity.User", "User")
-                        .WithMany("Trips")
-                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }

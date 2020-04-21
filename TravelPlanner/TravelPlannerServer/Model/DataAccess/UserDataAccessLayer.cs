@@ -38,6 +38,20 @@ namespace TravelPlannerServer.Model.DataAccess
             }
             return false;
         }
+        public static void AddTrip(int userId, Trip trip)
+        {
+            using var unitOfWork = new UnitOfWork(new TravelPlannerContext());
+            var result = unitOfWork.Users.Get(userId);
+            result.Trips.Add(trip);
+            unitOfWork.Complete();
+        }
+        public static void RemoveTrip(int userId, Trip trip)
+        {
+            using var unitOfWork = new UnitOfWork(new TravelPlannerContext());
+            var result = unitOfWork.Users.Get(userId);
+            result.Trips.Remove(trip);
+            unitOfWork.Complete();
+        }
         #endregion
     }
 }

@@ -1,6 +1,9 @@
 ﻿using System;
 using TravelPlannerServer.Logger;
+using TravelPlannerServer.Model.DataAccess;
+using TravelPlannerServer.Model.Entity;
 using TravelPlannerServer.Utils;
+using TravelPlannerServer.Utils.Enums;
 
 namespace TravelPlannerServer
 {

@@ -2,11 +2,11 @@
 
 namespace TravelPlannerServer.Database.Repository
 {
-    internal sealed class UserRepository
-        : Repository<User>, IUserRepository
+    internal sealed class TripRepository
+        : Repository<Trip>, ITripRepository
     {
         #region Constructors
-        public UserRepository(TravelPlannerContext context)
+        public TripRepository(TravelPlannerContext context)
             : base(context)
         {
 

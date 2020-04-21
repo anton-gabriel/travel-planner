@@ -11,6 +11,8 @@ namespace TravelPlannerServer.Database.UnitOfWork
         {
             this.context = context ?? throw new ArgumentNullException(nameof(context));
             Users = new UserRepository(context);
+            Offers = new OfferRepository(context);
+            Trips = new TripRepository(context);
         }
         #endregion
 
@@ -20,6 +22,8 @@ namespace TravelPlannerServer.Database.UnitOfWork
 
         #region Properties
         public IUserRepository Users { get; private set; }
+        public IOfferRepository Offers { get; private set; }
+        public ITripRepository Trips { get; private set; }
         #endregion
 
         #region IUnitOfWork

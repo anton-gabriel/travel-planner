@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace TravelPlannerServer.Model.Entity
@@ -25,6 +26,7 @@ namespace TravelPlannerServer.Model.Entity
         [MinLength(1)]
         [MaxLength(200)]
         public string Password { get; private set; }
+        public ICollection<Trip> Trips { get; private set; }
         #endregion
 
         #region Overrides

@@ -5,8 +5,11 @@ namespace TravelPlannerServer.Model.Entity
 {
     internal sealed class Trip
     {
-
         #region Constructors
+        private Trip()
+        {
+
+        }
         public Trip(Offer offer, DateTime startDate)
         {
             Offer = offer;
@@ -26,7 +29,7 @@ namespace TravelPlannerServer.Model.Entity
         [Required]
         public int Id { get; private set; }
         [Required]
-        public Offer Offer { get; private set; }
+        public Offer Offer { get; set; }
         public DateTime StartDate { get; private set; }
         public DateTime EndDate
         {
@@ -52,6 +55,7 @@ namespace TravelPlannerServer.Model.Entity
                 this.numberOfPersons = value;
             }
         }
+        public User User { get; private set; }
         #endregion
     }
 }

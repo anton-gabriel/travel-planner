@@ -1,13 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TravelPlannerServer.Utils.Enums;
 
 namespace TravelPlannerServer.Model.Entity
 {
     internal sealed class Offer
     {
         #region Constructors
-        public Offer(string location, uint days, uint price, uint numberOfPersons)
+        private Offer()
+        {
+
+        }
+        public Offer(TravelLocationType locationType, string location, uint days, uint price, uint numberOfPersons)
         {
             Location = location ?? throw new System.ArgumentNullException(nameof(location));
+            LocationType = locationType;
             Days = days;
             Price = price;
             NumberOfPersons = numberOfPersons;
@@ -28,6 +34,8 @@ namespace TravelPlannerServer.Model.Entity
         public uint Price { get; private set; }
         [Required]
         public uint NumberOfPersons { get; private set; }
+        [Required]
+        public TravelLocationType LocationType { get; private set; }
         #endregion
     }
 }
