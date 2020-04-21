@@ -31,7 +31,7 @@ namespace TravelPlannerServer.Model.Entity
         [Required]
         public uint Days { get; private set; }
         [Required]
-        public uint Price { get; private set; }
+        public double Price { get; private set; }
         [Required]
         public uint NumberOfPersons { get; private set; }
         [Required]

@@ -22,6 +22,7 @@ namespace TravelPlannerServer.Model.Entity
         #region Private fields
         private DateTime endDate;
         private uint numberOfPersons;
+        private double price;
         #endregion
 
         #region Properties
@@ -53,6 +54,19 @@ namespace TravelPlannerServer.Model.Entity
                     throw new ArgumentException(nameof(NumberOfPersons));
                 }
                 this.numberOfPersons = value;
+            }
+        }
+        [Required]
+        public double Price
+        {
+            get => price;
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentException(nameof(Price));
+                }
+                price = value;
             }
         }
         public User User { get; private set; }

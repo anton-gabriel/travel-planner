@@ -12,8 +12,8 @@
         #endregion
 
         #region Overrides
-        public override double Discount => 15;
-        public override uint NumberOfPersons => 15;
+        protected override double Discount => 15;
+        protected override uint NumberOfPersons => 15;
         #endregion
     }
 }

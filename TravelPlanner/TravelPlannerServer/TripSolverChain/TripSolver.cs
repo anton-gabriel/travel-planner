@@ -14,23 +14,23 @@ namespace TravelPlannerServer.TripSolverChain
         #endregion
 
         #region Properties
-        public TripSolver ParentSolver { get; private set; }
-        public virtual double Discount { get; private set; } = 0;
-        public virtual uint NumberOfPersons { get; private set; } = 0;
+        protected TripSolver ParentSolver { get; private set; }
+        protected virtual double Discount => 0;
+        protected virtual uint NumberOfPersons => 0;
         #endregion
 
         #region Public methods
-        public double GetTravelPrice(TravelRequest request, Offer offer)
+        public double GetTripPrice(uint persons, Offer offer)
         {
             double unitPrice = offer.Price / offer.NumberOfPersons;
             if (ParentSolver != null)
             {
-                if (NumberOfPersons < request.NumberOfPersons)
+                if (NumberOfPersons < persons)
                 {
-                    return ParentSolver.GetTravelPrice(request, offer);
+                    return ParentSolver.GetTripPrice(persons, offer);
                 }
             }
-            return request.NumberOfPersons * (unitPrice - unitPrice * Discount);
+            return persons * (unitPrice - unitPrice * Discount);
         }
         #endregion
     }

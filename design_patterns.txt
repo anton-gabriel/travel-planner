@@ -11,9 +11,7 @@ Creaționale:
 Structurale (minim 2):
 	- Proxy -> 
 		Daca user-ul sete logat, merg anumite comenzi.
-	- Bridge ->
-	    ILogger
-		Doua tipuri de logger (consola si fisier)
+	
 	- Facade ->
 		LoggerFacade -> "Interfata peste ILogger -> din fuctia Log se creeaza o interfata mai usor de apelat"
 		
