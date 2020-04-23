@@ -90,6 +90,45 @@ namespace TravelPlannerServer.Services
                             break;
                     }
                 }
+                else if(State == "tripsState")
+                {
+                    switch (request.Input)
+                    {
+                        case "1":
+                            await EditTripAction(requestStream, responseStream);
+                            break;
+                        case "2":
+                            await MainMenu(requestStream, responseStream);
+                            break;
+                        default:
+                            await InvalidAction(requestStream, responseStream);
+                            break;
+                    }
+                }
+                else if (State == "tripEditState")
+                {
+                    switch (request.Input)
+                    {
+                        case "1":
+                            await ChangeNumberOfPersonsAction(requestStream, responseStream);
+                            break;
+                        case "2":
+                            await ChangeStartDateAction(requestStream, responseStream);
+                            break;
+                        case "3":
+                            await ChangeEndDateAction(requestStream, responseStream);
+                            break;
+                        case "4":
+                            await CancelAction(requestStream, responseStream);
+                            break;
+                        case "5":
+                            await TripsMenu(requestStream, responseStream);
+                            break;
+                        default:
+                            await InvalidAction(requestStream, responseStream);
+                            break;
+                    }
+                }
                 else
                 {
                     switch (request.Input)
@@ -119,6 +158,154 @@ namespace TravelPlannerServer.Services
             await requestStream.MoveNext();
         }
 
+        private async Task StartMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
+            await responseStream.WriteAsync(new Response()
+            {
+                Message =
+                "1.Login" + "\n" +
+                "2.Register" + "\n" +
+                "0.Exit"
+            });
+            State = "startState";
+        }
+
+        private async Task MainMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
+            await responseStream.WriteAsync(new Response()
+            {
+                Message =
+                "1.Make travel request" + "\n" +
+                "2.Find offers" + "\n" +
+                "3.Show my trips" + "\n" +
+                "0.Exit"
+            });
+            State = "mainState";
+        }
+
+        private async Task TravelRequestMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await SetStartDateAction(requestStream, responseStream);
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.TravelRequestMenu(requestStream, responseStream);
+            State = "travelRequestState";
+            
+        }
+
+        private async Task FindOffersMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.FindOffersMenu(requestStream, responseStream);
+            State = "findOffersState";
+        }
+
+        private async Task TripsMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.TripsMenu(requestStream, responseStream);
+            State = "tripsState";
+        }
+        
+        private async Task TripEditMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
+            await responseStream.WriteAsync(new Response()
+            {
+                Message =
+                "1.Change number of persons" + "\n" +
+                "2.Change start date" + "\n" +
+                "3.Change end date" + "\n" +
+                "4.Cancel" + "\n" +
+                "5.Back" + "\n" +
+                "0.Exit"
+            });
+            State = "tripEditState";
+        }
+
+        private async Task ClearScreen(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "cls"
+            });
+        }
+
+        private async Task LoginAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "Please input username:"
+            });
+            await requestStream.MoveNext();
+            string username = requestStream.Current.Input;
+
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "Please input password:"
+            });
+            await requestStream.MoveNext();
+            string password = requestStream.Current.Input;
+
+            if (AuthenticationInvoker.Authenticate(new LoginCommand(new User(username, password))))
+            {
+                Logger.Info("Loggin successful");
+                await MainMenu(requestStream, responseStream);
+            }
+            else
+            {
+                Logger.Info("Loggin failed");
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Loggin failed" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+                await requestStream.MoveNext();
+                await StartMenu(requestStream, responseStream);
+            }
+        }
+
+        private async Task RegisterAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "Please input username:"
+            });
+            await requestStream.MoveNext();
+            string username = requestStream.Current.Input;
+
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "Please input password:"
+            });
+            await requestStream.MoveNext();
+            string password = requestStream.Current.Input;
+
+            if (AuthenticationInvoker.Authenticate(new RegisterCommand(new User(username, password))))
+            {
+                Logger.Info("Register successful");
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Register successful" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+                await requestStream.MoveNext();
+                await StartMenu(requestStream, responseStream);
+            }
+            else
+            {
+                Logger.Info("Register failed");
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Register failed" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+                await requestStream.MoveNext();
+                await StartMenu(requestStream, responseStream);
+            }
+        }
+
         private async Task SetStartDateAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
         {
             await ClearScreen(requestStream, responseStream);
@@ -128,7 +315,7 @@ namespace TravelPlannerServer.Services
             });
             await requestStream.MoveNext();
             string input = requestStream.Current.Input;
-            if(UserAccount.SetStartDateAction(input))
+            if (UserAccount.SetStartDateAction(input))
             {
                 await responseStream.WriteAsync(new Response()
                 {
@@ -285,137 +472,128 @@ namespace TravelPlannerServer.Services
             await TravelRequestMenu(requestStream, responseStream);
         }
 
-        private async Task StartMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        private async Task EditTripAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
         {
-            await ClearScreen(requestStream, responseStream);
-            await responseStream.WriteAsync(new Response()
-            {
-                Message =
-                "1.Login" + "\n" +
-                "2.Register" + "\n" +
-                "0.Exit"
-            });
-            State = "startState";
-        }
-
-        private async Task MainMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
-            await ClearScreen(requestStream, responseStream);
-            await responseStream.WriteAsync(new Response()
-            {
-                Message =
-                "1.Make travel request" + "\n" +
-                "2.Find offers" + "\n" +
-                "3.Show my trips" + "\n" +
-                "0.Exit"
-            });
-            State = "mainState";
-        }
-
-        private async Task TravelRequestMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
-            await SetStartDateAction(requestStream, responseStream);
-            await ClearScreen(requestStream, responseStream);
-            UserAccount.TravelRequestMenu(requestStream, responseStream);
-            State = "travelRequestState";
             
-        }
-
-        private async Task FindOffersMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
-            await ClearScreen(requestStream, responseStream);
-            UserAccount.FindOffersMenu(requestStream, responseStream);
-            State = "findOffersState";
-        }
-
-        private async Task TripsMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
-            await ClearScreen(requestStream, responseStream);
-            UserAccount.TripsMenu(requestStream, responseStream);
-            State = "tripsState";
-        }
-
-        private async Task ClearScreen(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
             await responseStream.WriteAsync(new Response()
             {
-                Message = "cls"
-            });
-        }
-
-        private async Task LoginAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
-            await responseStream.WriteAsync(new Response()
-            {
-                Message = "Please input username:"
+                Message = "Please input the id of the trip:"
             });
             await requestStream.MoveNext();
-            string username = requestStream.Current.Input;
+            string id = requestStream.Current.Input;
 
+            await TripEditMenu(requestStream, responseStream);
+        }
+
+        private async Task ChangeEndDateAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
             await responseStream.WriteAsync(new Response()
             {
-                Message = "Please input password:"
+                Message = "Please enter the end date of the travel (MMM dd, yyyy)"
             });
             await requestStream.MoveNext();
-            string password = requestStream.Current.Input;
-
-            if (AuthenticationInvoker.Authenticate(new LoginCommand(new User(username, password))))
+            string input = requestStream.Current.Input;
+            if (UserAccount.ChangeEndDateAction(input))
             {
-                Logger.Info("Loggin successful");
-                await MainMenu(requestStream, responseStream);
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Successful" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
             }
             else
             {
-                Logger.Info("Loggin failed");
                 await responseStream.WriteAsync(new Response()
                 {
-                    Message = "Loggin failed" + "\n" +
+                    Message = "Failed" + "\n" +
                     "Press Enter key to continue.\n"
                 });
-                await requestStream.MoveNext();
-                await StartMenu(requestStream, responseStream);
             }
+            await requestStream.MoveNext();
+            await TripEditMenu(requestStream, responseStream);
         }
 
-        private async Task RegisterAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        private async Task ChangeStartDateAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
         {
+            await ClearScreen(requestStream, responseStream);
             await responseStream.WriteAsync(new Response()
             {
-                Message = "Please input username:"
+                Message = "Please enter the start date of the travel (MMM dd, yyyy)"
             });
             await requestStream.MoveNext();
-            string username = requestStream.Current.Input;
-
-            await responseStream.WriteAsync(new Response()
+            string input = requestStream.Current.Input;
+            if (UserAccount.ChangeStartDateAction(input))
             {
-                Message = "Please input password:"
-            });
-            await requestStream.MoveNext();
-            string password = requestStream.Current.Input;
-
-            if (AuthenticationInvoker.Authenticate(new RegisterCommand(new User(username, password))))
-            {
-                Logger.Info("Register successful");
                 await responseStream.WriteAsync(new Response()
                 {
-                    Message = "Register successful" + "\n" +
+                    Message = "Successful" + "\n" +
                     "Press Enter key to continue.\n"
                 });
-                await requestStream.MoveNext();
-                await StartMenu(requestStream, responseStream);
             }
             else
             {
-                Logger.Info("Register failed");
                 await responseStream.WriteAsync(new Response()
                 {
-                    Message = "Register failed" + "\n" +
+                    Message = "Failed" + "\n" +
                     "Press Enter key to continue.\n"
                 });
-                await requestStream.MoveNext();
-                await StartMenu(requestStream, responseStream);
             }
+            await requestStream.MoveNext();
+            await TripEditMenu(requestStream, responseStream);
         }
+
+        private async Task ChangeNumberOfPersonsAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            await ClearScreen(requestStream, responseStream);
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "Please enter the number of persons of the travel"
+            });
+            await requestStream.MoveNext();
+            string input = requestStream.Current.Input;
+            if (UserAccount.ChangeNumberOfPersonsAction(input))
+            {
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Successful" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+            }
+            else
+            {
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Failed" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+            }
+            await requestStream.MoveNext();
+            await TripEditMenu(requestStream, responseStream);
+        }
+
+        private async Task CancelAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            if (UserAccount.CancelAction())
+            {
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Successful" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+            }
+            else
+            {
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Failed" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+            }
+            await requestStream.MoveNext();
+            await TripEditMenu(requestStream, responseStream);
+        }
+
         #endregion
     }
 }

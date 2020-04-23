@@ -1,6 +1,8 @@
 ﻿using Generated;
 using Grpc.Core;
+using System;
 using TravelPlannerServer.AuthenticationObservable;
+using TravelPlannerServer.Model;
 using TravelPlannerServer.Model.Entity;
 
 namespace TravelPlannerServer.UserProxy
@@ -18,6 +20,18 @@ namespace TravelPlannerServer.UserProxy
         #region Properties
         private IUserAccount UserAccount { get; set; }
         private bool Activated { get; set; }
+        public TravelRequest TravelRequest
+        {
+            get => Activated ? UserAccount.TravelRequest : null;
+
+            set
+            {
+                if (Activated)
+                {
+                    UserAccount.TravelRequest = value;
+                }
+            }
+        }
         #endregion
 
         #region IUserAccount
@@ -78,6 +92,21 @@ namespace TravelPlannerServer.UserProxy
             {
                 UserAccount.TripsMenu(requestStream, responseStream);
             }
+        }
+
+        public bool ChangeNumberOfPersonsAction(string number)
+        {
+            return Activated ? UserAccount.ChangeNumberOfPersonsAction(number) : false;
+        }
+
+        public bool ChangeEndDateAction(string endDate)
+        {
+            return Activated ? UserAccount.ChangeEndDateAction(endDate) : false;
+        }
+
+        public bool CancelAction()
+        {
+            return Activated ? UserAccount.CancelAction() : false;
         }
         #endregion
 
