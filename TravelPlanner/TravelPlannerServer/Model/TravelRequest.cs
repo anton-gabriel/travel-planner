@@ -35,7 +35,7 @@ namespace TravelPlannerServer.Model
             #endregion
 
             #region Builder
-            public TravelRequestBuilder AddAddEndDate(DateTime date)
+            public TravelRequestBuilder AddEndDate(DateTime date)
             {
                 TravelRequest.EndDate = date;
                 return this;
