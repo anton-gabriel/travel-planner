@@ -4,6 +4,7 @@ using System;
 using TravelPlannerServer.AuthenticationObservable;
 using TravelPlannerServer.Model;
 using TravelPlannerServer.Model.Entity;
+using TravelPlannerServer.TravelState;
 
 namespace TravelPlannerServer.UserProxy
 {
@@ -32,6 +33,32 @@ namespace TravelPlannerServer.UserProxy
                 }
             }
         }
+
+        public string Username
+        {
+            get => Activated ? UserAccount.Username : null;
+
+            set
+            {
+                if (Activated)
+                {
+                    UserAccount.Username = value;
+                }
+            }
+        }
+
+        public TripStateChanger TravelStateChanger
+        {
+            get => Activated ? UserAccount.TravelStateChanger : null;
+
+            set
+            {
+                if (Activated)
+                {
+                    UserAccount.TravelStateChanger = value;
+                }
+            }
+        }
         #endregion
 
         #region IUserAccount
@@ -40,12 +67,9 @@ namespace TravelPlannerServer.UserProxy
             return Activated ? UserAccount.AddTrip(trip) : false;
         }
 
-        public void FindOffersMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        public bool GetTripAction(Offer offer)
         {
-            if (Activated)
-            {
-                UserAccount.FindOffersMenu(requestStream, responseStream);
-            }
+            return Activated ? UserAccount.GetTripAction(offer) : false;
         }
 
         public bool SaveAction()

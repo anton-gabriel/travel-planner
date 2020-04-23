@@ -4,11 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using TravelPlannerServer.Model;
+using TravelPlannerServer.Model.DataAccess;
 using TravelPlannerServer.Model.Entity;
 using TravelPlannerServer.Services;
 using TravelPlannerServer.TravelState;
 using TravelPlannerServer.Utils.Enums;
 using static TravelPlannerServer.Model.TravelRequest;
+using System.Linq;
+using TravelPlannerServer.TripSolverChain;
 
 namespace TravelPlannerServer.UserProxy
 {
@@ -25,6 +28,7 @@ namespace TravelPlannerServer.UserProxy
         private TravelRequestBuilder TravelRequestBuilder { get; set; }
         public TravelRequest TravelRequest { get; set; }
         private TripStateChanger TripStateChanger { get; set; }
+        public string Username { get; set; }
         #endregion
 
         #region Public methods
@@ -97,14 +101,12 @@ namespace TravelPlannerServer.UserProxy
             return true;
         }
 
-        public async void FindOffersMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        public bool GetTripAction(Offer offer)
         {
-            await responseStream.WriteAsync(new Response()
-            {
-                Message =
-                "1.Make travel request" + "\n" +
-                "0.Exit"
-            });
+            TripSolver tripSolver = TripSolverConfiguration.GetTripSolver();
+            tripSolver.GetTripPrice(TravelRequest.NumberOfPersons, offer);
+            UserDataAccessLayer.AddTrip(UserDataAccessLayer.GetUser(Username).Id, new Trip(offer, TravelRequest.StartDate));
+            return true;
         }
 
         public async void TripsMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
@@ -116,20 +118,6 @@ namespace TravelPlannerServer.UserProxy
                 "2.Back" + "\n" +
                 "0.Exit"
             });
-        }
-
-        public static bool ConvertToDateTime(in string data, out DateTime result)
-        {
-            result = default;
-            try
-            {
-                result = DateTime.Parse(data);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         public bool ChangeNumberOfPersonsAction(string input)
@@ -152,6 +140,20 @@ namespace TravelPlannerServer.UserProxy
         public bool CancelAction()
         {
             return TripStateChanger.Cancel(); ;
+        }
+
+        public static bool ConvertToDateTime(in string data, out DateTime result)
+        {
+            result = default;
+            try
+            {
+                result = DateTime.Parse(data);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
         #endregion
     }

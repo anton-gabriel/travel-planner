@@ -7,6 +7,8 @@ using TravelPlannerServer.Command;
 using TravelPlannerServer.Logger;
 using TravelPlannerServer.Model.DataAccess;
 using TravelPlannerServer.Model.Entity;
+using TravelPlannerServer.TravelState;
+using TravelPlannerServer.TripSolverChain;
 using TravelPlannerServer.UserProxy;
 using TravelPlannerServer.Utils.Enums;
 
@@ -30,16 +32,10 @@ namespace TravelPlannerServer.Services
 
         #endregion
 
-        Func<Offer, bool> SearchByType()
-        {
-            return new Func<Offer, bool>(offer => offer.LocationType == TravelLocationType.Global);
-        }
-
         #region Overrides
         public override async Task Communicate(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream, ServerCallContext context)
         {
             var user = UserDataAccessLayer.GetUser("Gabi");
-            var offers = OfferDataAccessLayer.FindOffers(offer => offer.LocationType == TravelLocationType.Global);
             while (true)
             {
                 await requestStream.MoveNext();
@@ -124,15 +120,12 @@ namespace TravelPlannerServer.Services
                             await ChangeNumberOfPersonsAction(requestStream, responseStream);
                             break;
                         case "2":
-                            await ChangeStartDateAction(requestStream, responseStream);
-                            break;
-                        case "3":
                             await ChangeEndDateAction(requestStream, responseStream);
                             break;
-                        case "4":
+                        case "3":
                             await CancelAction(requestStream, responseStream);
                             break;
-                        case "5":
+                        case "4":
                             await TripsMenu(requestStream, responseStream);
                             break;
                         default:
@@ -208,8 +201,34 @@ namespace TravelPlannerServer.Services
         private async Task FindOffersMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
         {
             await ClearScreen(requestStream, responseStream);
-            UserAccount.FindOffersMenu(requestStream, responseStream);
-            State = "findOffersState";
+            var offers = OfferDataAccessLayer.FindOffers(SearchByType());
+            string sendList = "";
+            sendList += "0.Exit\n";
+            sendList += "1.Back\n";
+            for (int i = 1; i < offers.Count(); i++)
+            {
+                sendList += $"{i}.{offers.ElementAt(i - 1)}\n";
+            }
+            sendList += "Choose an offer:";
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = sendList
+            });
+            await requestStream.MoveNext();
+            var input = Convert.ToInt32(requestStream.Current.Input);
+            if (input == 1)
+            {
+                await MainMenu(requestStream, responseStream);
+            }
+            UserAccount.GetTripAction(offers.ElementAt(input));
+            await responseStream.WriteAsync(new Response()
+            {
+                Message = "Successful" + "\n" +
+                    "Press Enter key to continue.\n"
+            });
+            await requestStream.MoveNext();
+            await MainMenu(requestStream, responseStream);
+
         }
 
         private async Task TripsMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
@@ -226,10 +245,9 @@ namespace TravelPlannerServer.Services
             {
                 Message =
                 "1.Change number of persons" + "\n" +
-                "2.Change start date" + "\n" +
-                "3.Change end date" + "\n" +
-                "4.Cancel" + "\n" +
-                "5.Back" + "\n" +
+                "2.Change end date" + "\n" +
+                "3.Cancel" + "\n" +
+                "4.Back" + "\n" +
                 "0.Exit"
             });
             State = "tripEditState";
@@ -262,6 +280,7 @@ namespace TravelPlannerServer.Services
             if (AuthenticationInvoker.Authenticate(new LoginCommand(new User(username, password))))
             {
                 Logger.Info("Loggin successful");
+                UserAccount.Username = username;
                 await MainMenu(requestStream, responseStream);
             }
             else
@@ -485,14 +504,26 @@ namespace TravelPlannerServer.Services
 
         private async Task EditTripAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
         {
-            
+            var trips = UserDataAccessLayer.GetUser(UserAccount.Username).Trips;
+            string sendList = "";
+            sendList += "0.Exit\n";
+            sendList += "1.Back\n";
+            for (int i = 1; i < trips.Count(); i++)
+            {
+                sendList += $"{i}.{trips.ElementAt(i - 1)}\n";
+            }
+            sendList += "Choose a trip:";
             await responseStream.WriteAsync(new Response()
             {
-                Message = "Please input the id of the trip:"
+                Message = sendList
             });
             await requestStream.MoveNext();
-            string id = requestStream.Current.Input;
-
+            var input = Convert.ToInt32(requestStream.Current.Input);
+            if (input == 1)
+            {
+                await MainMenu(requestStream, responseStream);
+            }
+            UserAccount.TravelStateChanger = new TripStateChanger(trips.ElementAt(input));
             await TripEditMenu(requestStream, responseStream);
         }
 
@@ -506,35 +537,6 @@ namespace TravelPlannerServer.Services
             await requestStream.MoveNext();
             string input = requestStream.Current.Input;
             if (UserAccount.ChangeEndDateAction(input))
-            {
-                await responseStream.WriteAsync(new Response()
-                {
-                    Message = "Successful" + "\n" +
-                    "Press Enter key to continue.\n"
-                });
-            }
-            else
-            {
-                await responseStream.WriteAsync(new Response()
-                {
-                    Message = "Failed" + "\n" +
-                    "Press Enter key to continue.\n"
-                });
-            }
-            await requestStream.MoveNext();
-            await TripEditMenu(requestStream, responseStream);
-        }
-
-        private async Task ChangeStartDateAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
-        {
-            await ClearScreen(requestStream, responseStream);
-            await responseStream.WriteAsync(new Response()
-            {
-                Message = "Please enter the start date of the travel (MMM dd, yyyy)"
-            });
-            await requestStream.MoveNext();
-            string input = requestStream.Current.Input;
-            if (UserAccount.ChangeStartDateAction(input))
             {
                 await responseStream.WriteAsync(new Response()
                 {
@@ -605,6 +607,10 @@ namespace TravelPlannerServer.Services
             await TripEditMenu(requestStream, responseStream);
         }
 
+        Func<Offer, bool> SearchByType()
+        {
+            return new Func<Offer, bool>(offer => offer.LocationType == TravelLocationType.Global);
+        }
         #endregion
     }
 }
