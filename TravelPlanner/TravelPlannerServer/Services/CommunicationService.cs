@@ -1,10 +1,14 @@
 ﻿using Generated;
 using Grpc.Core;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TravelPlannerServer.Command;
 using TravelPlannerServer.Logger;
+using TravelPlannerServer.Model.DataAccess;
 using TravelPlannerServer.Model.Entity;
 using TravelPlannerServer.UserProxy;
+using TravelPlannerServer.Utils.Enums;
 
 namespace TravelPlannerServer.Services
 {
@@ -23,12 +27,19 @@ namespace TravelPlannerServer.Services
         private UserAccountProxy UserAccount { get; set; } = new UserAccountProxy();
         private TravelPlannerLogger Logger => TravelPlannerLogger.Instance;
         private string State { get; set; } = "";
-        
+
         #endregion
+
+        Func<Offer, bool> SearchByType()
+        {
+            return new Func<Offer, bool>(offer => offer.LocationType == TravelLocationType.Global);
+        }
 
         #region Overrides
         public override async Task Communicate(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream, ServerCallContext context)
         {
+            var user = UserDataAccessLayer.GetUser("Gabi");
+            var offers = OfferDataAccessLayer.FindOffers(offer => offer.LocationType == TravelLocationType.Global);
             while (true)
             {
                 await requestStream.MoveNext();

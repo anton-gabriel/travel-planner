@@ -7,6 +7,12 @@ namespace TravelPlannerServer.Model.DataAccess
     internal static class UserDataAccessLayer
     {
         #region Public methods
+        public static User GetUser(string name)
+        {
+            using var unitOfWork = new UnitOfWork(new TravelPlannerContext());
+            return unitOfWork.Users.SingleOrDefault(user => user.Username.Equals(name));
+        }
+
         public static bool Login(User user)
         {
             if (user is null)
