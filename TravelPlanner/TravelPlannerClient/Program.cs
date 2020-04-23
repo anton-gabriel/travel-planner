@@ -46,7 +46,8 @@ namespace TravelPlannerClient
             {
                 await call.RequestStream.CompleteAsync();
                 await responseReaderTask;
-            } catch (Exception)
+            }
+            catch (Exception)
             {
 
             }
