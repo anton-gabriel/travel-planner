@@ -9,7 +9,7 @@ namespace TravelPlannerServer.TripSolverChain
         #region Constructors
         public TripSolver(TripSolver parent)
         {
-            ParentSolver = parent ?? throw new ArgumentNullException(nameof(parent));
+            ParentSolver = parent;
         }
         #endregion
 
@@ -30,7 +30,7 @@ namespace TravelPlannerServer.TripSolverChain
                     return ParentSolver.GetTripPrice(persons, offer);
                 }
             }
-            return persons * (unitPrice - unitPrice * Discount);
+            return persons * (unitPrice - unitPrice * (Discount/100));
         }
         #endregion
     }

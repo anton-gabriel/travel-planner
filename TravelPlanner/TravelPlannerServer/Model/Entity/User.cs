@@ -14,6 +14,10 @@ namespace TravelPlannerServer.Model.Entity
         }
         #endregion
 
+        #region Private fields
+        private ICollection<Trip> trips;
+        #endregion
+
         #region Properties
         [Key]
         [Required]
@@ -26,7 +30,18 @@ namespace TravelPlannerServer.Model.Entity
         [MinLength(1)]
         [MaxLength(200)]
         public string Password { get; private set; }
-        public ICollection<Trip> Trips { get; private set; }
+        public ICollection<Trip> Trips
+        {
+            get 
+            {
+                if(this.trips == null)
+                {
+                    this.trips = new HashSet<Trip>();
+                }
+                return this.trips;
+            }
+            private set => trips = value;
+        }
         #endregion
 
         #region Overrides

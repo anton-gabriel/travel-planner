@@ -10,12 +10,13 @@ namespace TravelPlannerServer.UserProxy
     {
         TravelRequest TravelRequest { get; set; }
         public string Username { get; set; }
-        TripStateChanger TravelStateChanger { get; set; }
+        TripStateChanger TripStateChanger { get; set; }
 
         bool AddTrip(Trip trip);
         void TravelRequestMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream);
         bool GetTripAction(Offer offer);
         void TripsMenu(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream);
+        public bool SetStartDateAction(string startDate);
         public bool SetEndDateAction(string endDate);
         public bool SetNumberOfPersonsAction(string number);
         public bool SetNumberOfRoomsAction(string number);
@@ -24,5 +25,6 @@ namespace TravelPlannerServer.UserProxy
         public bool ChangeNumberOfPersonsAction(string number);
         public bool ChangeEndDateAction(string endDate);
         public bool CancelAction();
+        public bool UpdateAction();
     }
 }

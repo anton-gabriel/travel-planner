@@ -69,7 +69,12 @@ namespace TravelPlannerServer.Model.Entity
                 price = value;
             }
         }
-        public User User { get; private set; }
+        public User User { get; set; }
         #endregion
+
+        public override string ToString()
+        {
+            return $"[{Offer}, {StartDate}, {EndDate}, {NumberOfPersons}, {Price}, {User.Username}]";
+        }
     }
 }

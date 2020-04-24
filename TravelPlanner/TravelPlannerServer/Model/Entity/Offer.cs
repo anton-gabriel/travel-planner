@@ -37,5 +37,10 @@ namespace TravelPlannerServer.Model.Entity
         [Required]
         public TravelLocationType LocationType { get; private set; }
         #endregion
+
+        public override string ToString()
+        {
+            return $"[{Location}, {Days}, {Price}, {NumberOfPersons}. {LocationType.ToString()}]";
+        }
     }
 }

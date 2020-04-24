@@ -29,13 +29,11 @@ namespace TravelPlannerServer.Services
         private UserAccountProxy UserAccount { get; set; } = new UserAccountProxy();
         private TravelPlannerLogger Logger => TravelPlannerLogger.Instance;
         private string State { get; set; } = "";
-
         #endregion
 
         #region Overrides
         public override async Task Communicate(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream, ServerCallContext context)
         {
-            var user = UserDataAccessLayer.GetUser("Gabi");
             while (true)
             {
                 await requestStream.MoveNext();
@@ -128,6 +126,9 @@ namespace TravelPlannerServer.Services
                         case "4":
                             await TripsMenu(requestStream, responseStream);
                             break;
+                        case "5":
+                            await UpdateAction(requestStream, responseStream);
+                            break;
                         default:
                             await InvalidAction(requestStream, responseStream);
                             break;
@@ -205,9 +206,9 @@ namespace TravelPlannerServer.Services
             string sendList = "";
             sendList += "0.Exit\n";
             sendList += "1.Back\n";
-            for (int i = 1; i < offers.Count(); i++)
+            for (int i = 2; i < offers.Count() + 2; i++)
             {
-                sendList += $"{i}.{offers.ElementAt(i - 1)}\n";
+                sendList += $"{i}.{offers.ElementAt(i - 2)}\n";
             }
             sendList += "Choose an offer:";
             await responseStream.WriteAsync(new Response()
@@ -220,14 +221,17 @@ namespace TravelPlannerServer.Services
             {
                 await MainMenu(requestStream, responseStream);
             }
-            UserAccount.GetTripAction(offers.ElementAt(input));
-            await responseStream.WriteAsync(new Response()
+            else
             {
-                Message = "Successful" + "\n" +
-                    "Press Enter key to continue.\n"
-            });
-            await requestStream.MoveNext();
-            await MainMenu(requestStream, responseStream);
+                UserAccount.GetTripAction(offers.ElementAt(input - 2));
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Successful" + "\n" +
+                        "Press Enter key to continue.\n"
+                });
+                await requestStream.MoveNext();
+                await MainMenu(requestStream, responseStream);
+            }
 
         }
 
@@ -248,6 +252,7 @@ namespace TravelPlannerServer.Services
                 "2.Change end date" + "\n" +
                 "3.Cancel" + "\n" +
                 "4.Back" + "\n" +
+                "5.Update" + "\n" +
                 "0.Exit"
             });
             State = "tripEditState";
@@ -369,7 +374,7 @@ namespace TravelPlannerServer.Services
             await ClearScreen(requestStream, responseStream);
             await responseStream.WriteAsync(new Response()
             {
-                Message = "Please enter the end date of the travel (M dd, yyyy)"
+                Message = "Please enter the end date of the travel (MMM dd, yyyy)"
             });
             await requestStream.MoveNext();
             string input = requestStream.Current.Input;
@@ -390,7 +395,9 @@ namespace TravelPlannerServer.Services
                 });
             }
             await requestStream.MoveNext();
-            await TravelRequestMenu(requestStream, responseStream);
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.TravelRequestMenu(requestStream, responseStream);
+            State = "travelRequestState";
         }
 
         private async Task SetNumberOfPersonsAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
@@ -419,7 +426,9 @@ namespace TravelPlannerServer.Services
                 });
             }
             await requestStream.MoveNext();
-            await TravelRequestMenu(requestStream, responseStream);
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.TravelRequestMenu(requestStream, responseStream);
+            State = "travelRequestState";
         }
 
         private async Task SetNumberOfRoomsAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
@@ -448,7 +457,9 @@ namespace TravelPlannerServer.Services
                 });
             }
             await requestStream.MoveNext();
-            await TravelRequestMenu(requestStream, responseStream);
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.TravelRequestMenu(requestStream, responseStream);
+            State = "travelRequestState";
         }
 
         private async Task SaveAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
@@ -499,18 +510,22 @@ namespace TravelPlannerServer.Services
                 });
             }
             await requestStream.MoveNext();
-            await TravelRequestMenu(requestStream, responseStream);
+            await ClearScreen(requestStream, responseStream);
+            UserAccount.TravelRequestMenu(requestStream, responseStream);
+            State = "travelRequestState";
         }
 
         private async Task EditTripAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
         {
-            var trips = UserDataAccessLayer.GetUser(UserAccount.Username).Trips;
+            await ClearScreen(requestStream, responseStream);
+            var user = UserDataAccessLayer.GetUser(UserAccount.Username);
+            var trips = TripDataAccessLayer.GetUserTrips(user.Id);
             string sendList = "";
             sendList += "0.Exit\n";
             sendList += "1.Back\n";
-            for (int i = 1; i < trips.Count(); i++)
+            for (int i = 2; i < trips.Count() + 2; i++)
             {
-                sendList += $"{i}.{trips.ElementAt(i - 1)}\n";
+                sendList += $"{i}.{trips.ElementAt(i - 2)}\n";
             }
             sendList += "Choose a trip:";
             await responseStream.WriteAsync(new Response()
@@ -523,8 +538,11 @@ namespace TravelPlannerServer.Services
             {
                 await MainMenu(requestStream, responseStream);
             }
-            UserAccount.TravelStateChanger = new TripStateChanger(trips.ElementAt(input));
-            await TripEditMenu(requestStream, responseStream);
+            else
+            {
+                UserAccount.TripStateChanger = new TripStateChanger(trips.ElementAt(input - 2));
+                await TripEditMenu(requestStream, responseStream);
+            }
         }
 
         private async Task ChangeEndDateAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
@@ -605,6 +623,28 @@ namespace TravelPlannerServer.Services
             }
             await requestStream.MoveNext();
             await TripEditMenu(requestStream, responseStream);
+        }
+
+        private async Task UpdateAction(IAsyncStreamReader<UserRequest> requestStream, IServerStreamWriter<Response> responseStream)
+        {
+            if (UserAccount.UpdateAction())
+            {
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Successful" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+            }
+            else
+            {
+                await responseStream.WriteAsync(new Response()
+                {
+                    Message = "Failed" + "\n" +
+                    "Press Enter key to continue.\n"
+                });
+            }
+            await requestStream.MoveNext();
+            await MainMenu(requestStream, responseStream);
         }
 
         Func<Offer, bool> SearchByType()

@@ -47,15 +47,15 @@ namespace TravelPlannerServer.UserProxy
             }
         }
 
-        public TripStateChanger TravelStateChanger
+        public TripStateChanger TripStateChanger
         {
-            get => Activated ? UserAccount.TravelStateChanger : null;
+            get => Activated ? UserAccount.TripStateChanger : null;
 
             set
             {
                 if (Activated)
                 {
-                    UserAccount.TravelStateChanger = value;
+                    UserAccount.TripStateChanger = value;
                 }
             }
         }
@@ -127,7 +127,10 @@ namespace TravelPlannerServer.UserProxy
         {
             return Activated ? UserAccount.ChangeEndDateAction(endDate) : false;
         }
-
+        public bool UpdateAction()
+        {
+            return Activated ? UserAccount.UpdateAction() : false;
+        }
         public bool CancelAction()
         {
             return Activated ? UserAccount.CancelAction() : false;

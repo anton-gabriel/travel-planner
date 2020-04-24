@@ -27,7 +27,7 @@ namespace TravelPlannerServer.UserProxy
         #region Properties
         private TravelRequestBuilder TravelRequestBuilder { get; set; }
         public TravelRequest TravelRequest { get; set; }
-        private TripStateChanger TripStateChanger { get; set; }
+        public TripStateChanger TripStateChanger { get; set; }
         public string Username { get; set; }
         #endregion
 
@@ -154,6 +154,12 @@ namespace TravelPlannerServer.UserProxy
             {
                 return false;
             }
+        }
+
+        public bool UpdateAction()
+        {
+            TripDataAccessLayer.UpdateTrip(TripStateChanger.Trip);
+            return true;
         }
         #endregion
     }
